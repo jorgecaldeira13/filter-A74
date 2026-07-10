@@ -187,28 +187,32 @@
 
     <h2>Adjust</h2>
     <div class="control">
-      <label>Warmth / split-tone <span class="val" id="val-warmth">35</span></label>
-      <input type="range" id="warmth" min="0" max="100" value="35">
+      <label>Warmth <span class="val" id="val-warmth">40</span></label>
+      <input type="range" id="warmth" min="0" max="100" value="40">
     </div>
     <div class="control">
-      <label>Contrast <span class="val" id="val-contrast">22</span></label>
-      <input type="range" id="contrast" min="0" max="100" value="22">
+      <label>Contrast <span class="val" id="val-contrast">16</span></label>
+      <input type="range" id="contrast" min="0" max="100" value="16">
     </div>
     <div class="control">
-      <label>Faded blacks <span class="val" id="val-fade">18</span></label>
-      <input type="range" id="fade" min="0" max="100" value="18">
+      <label>Faded blacks <span class="val" id="val-fade">16</span></label>
+      <input type="range" id="fade" min="0" max="100" value="16">
     </div>
     <div class="control">
-      <label>Saturation <span class="val" id="val-saturation">-8</span></label>
-      <input type="range" id="saturation" min="-50" max="50" value="-8">
+      <label>Saturation <span class="val" id="val-saturation">-16</span></label>
+      <input type="range" id="saturation" min="-50" max="50" value="-16">
     </div>
     <div class="control">
-      <label>Vignette <span class="val" id="val-vignette">32</span></label>
-      <input type="range" id="vignette" min="0" max="100" value="32">
+      <label>Glow / haze <span class="val" id="val-glow">30</span></label>
+      <input type="range" id="glow" min="0" max="100" value="30">
     </div>
     <div class="control">
-      <label>Grain <span class="val" id="val-grain">14</span></label>
-      <input type="range" id="grain" min="0" max="100" value="14">
+      <label>Vignette <span class="val" id="val-vignette">26</span></label>
+      <input type="range" id="vignette" min="0" max="100" value="26">
+    </div>
+    <div class="control">
+      <label>Grain <span class="val" id="val-grain">18</span></label>
+      <input type="range" id="grain" min="0" max="100" value="18">
     </div>
   </div>
 </div>
@@ -230,14 +234,14 @@
   const btnDownload = document.getElementById('btnDownload');
   const btnReset = document.getElementById('btnReset');
 
-  const sliderIds = ['warmth', 'contrast', 'fade', 'saturation', 'vignette', 'grain'];
+  const sliderIds = ['warmth', 'contrast', 'fade', 'saturation', 'glow', 'vignette', 'grain'];
   const sliders = {};
   sliderIds.forEach(id => sliders[id] = document.getElementById(id));
 
   const presets = {
-    a74:     { warmth: 35, contrast: 22, fade: 18, saturation: -8,  vignette: 32, grain: 14 },
-    subtle:  { warmth: 18, contrast: 12, fade: 10, saturation: -4,  vignette: 16, grain: 6 },
-    punchy:  { warmth: 45, contrast: 34, fade: 12, saturation: 6,   vignette: 42, grain: 18 }
+    a74:     { warmth: 40, contrast: 16, fade: 16, saturation: -16, glow: 30, vignette: 26, grain: 18 },
+    subtle:  { warmth: 22, contrast: 10, fade: 10, saturation: -8,  glow: 16, vignette: 14, grain: 8 },
+    punchy:  { warmth: 55, contrast: 26, fade: 10, saturation: -4,  glow: 42, vignette: 36, grain: 22 }
   };
 
   let originalImageData = null; // pristine pixels at working resolution
@@ -297,13 +301,12 @@
         g = contrastLUT[g | 0];
         b = contrastLUT[b | 0];
 
-        // 3. split toning: warm highlights, teal shadows
+        // 3. warm cast (golden, stronger in highlights, shadows stay warm brown not teal)
         const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
         const hi = lum;
-        const sh = 1 - lum;
-        r += warmth * (16 * hi - 7 * sh);
-        g += warmth * (4 * hi - 2 * sh);
-        b += warmth * (-12 * hi + 11 * sh);
+        r += warmth * (8 + 14 * hi);
+        g += warmth * (2 + 4 * hi);
+        b -= warmth * (10 + 8 * hi);
 
         // 4. saturation
         const lum2 = 0.299 * r + 0.587 * g + 0.114 * b;
@@ -336,6 +339,28 @@
     }
 
     ctx.putImageData(out, 0, 0);
+
+    if (params.glow > 0) {
+      applyGlow(params.glow / 100);
+    }
+  }
+
+  function applyGlow(glowAmt) {
+    // Downsample (cheap blur) then screen-blend back for a soft, hazy halation look.
+    const bw = Math.max(1, Math.round(width / 10));
+    const bh = Math.max(1, Math.round(height / 10));
+    const small = document.createElement('canvas');
+    small.width = bw;
+    small.height = bh;
+    const sctx = small.getContext('2d');
+    sctx.drawImage(canvas, 0, 0, bw, bh);
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    ctx.globalAlpha = glowAmt * 0.45;
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(small, 0, 0, width, height);
+    ctx.restore();
   }
 
   function currentParams() {
