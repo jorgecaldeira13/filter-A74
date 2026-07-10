@@ -147,6 +147,66 @@
   input[type="file"] { display: none; }
   #status { text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: 8px; min-height: 1.2em; }
   .compare-hint { text-align:center; font-size:0.75rem; color: var(--muted); margin-top: 6px; }
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    max-width: min(92vw, 640px);
+    max-height: 92vh;
+    overflow: auto;
+    text-align: center;
+    position: relative;
+  }
+  .modal-box img {
+    max-width: 100%;
+    max-height: 60vh;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto 16px;
+  }
+  .modal-close {
+    position: absolute;
+    top: 6px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 6px 8px;
+  }
+  a.save-link {
+    display: inline-block;
+    background: var(--accent);
+    color: #1a1a1a;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  a.save-link:hover { opacity: 0.9; }
+  .modal-hint {
+    color: var(--muted);
+    font-size: 0.78rem;
+    margin: 12px auto 0;
+    max-width: 380px;
+    line-height: 1.4;
+  }
 </style>
 </head>
 <body>
@@ -175,6 +235,15 @@
     </div>
     <div id="status"></div>
     <div class="compare-hint">Hold "Show original" to compare before/after.</div>
+  </div>
+
+  <div class="modal-overlay" id="downloadModal">
+    <div class="modal-box">
+      <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+      <img id="modalImg" alt="Filtered photo">
+      <a id="modalSaveLink" class="save-link" download="a7iv-50mm-filtered.jpg">Save photo</a>
+      <p class="modal-hint">If tapping "Save photo" doesn't work, press-and-hold (or right-click) the image above and choose "Save Image" / "Download image".</p>
+    </div>
   </div>
 
   <div class="panel">
@@ -466,18 +535,28 @@
     b.addEventListener('click', () => applyPreset(b.dataset.preset));
   });
 
-  // Download
+  // Download — shown in a modal with a real, directly-clickable save link plus a
+  // press-and-hold/right-click fallback, since sandboxed viewers (e.g. Artifacts)
+  // often block synthetic-click downloads on detached <a> elements.
+  const downloadModal = document.getElementById('downloadModal');
+  const modalImg = document.getElementById('modalImg');
+  const modalSaveLink = document.getElementById('modalSaveLink');
+  const modalClose = document.getElementById('modalClose');
+
   btnDownload.addEventListener('click', () => {
     if (!originalImageData) return;
     showingOriginal = false;
     render();
-    canvas.toBlob((blob) => {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'a7iv-50mm-filtered.jpg';
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-    }, 'image/jpeg', 0.93);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.93);
+    modalImg.src = dataUrl;
+    modalSaveLink.href = dataUrl;
+    downloadModal.classList.add('open');
+  });
+
+  function closeModal() { downloadModal.classList.remove('open'); }
+  modalClose.addEventListener('click', closeModal);
+  downloadModal.addEventListener('click', (e) => {
+    if (e.target === downloadModal) closeModal();
   });
 
   updateLabels();
