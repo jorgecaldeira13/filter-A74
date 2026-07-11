@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A7IV · 50mm Film Look</title>
+<title>A7IV · 50mm Photo Filters</title>
 <style>
   :root {
     color-scheme: dark;
@@ -144,6 +144,24 @@
     flex-wrap: wrap;
   }
   .presets button { flex: 1 1 auto; font-size: 0.78rem; padding: 7px 10px; }
+  .mode-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .mode-tab {
+    flex: 1 1 auto;
+    font-size: 0.8rem;
+    padding: 9px 10px;
+  }
+  .mode-tab.active {
+    background: var(--accent);
+    color: #1a1a1a;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .mode-panel { display: none; }
+  .mode-panel.active { display: block; }
   input[type="file"] { display: none; }
   #status { text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: 8px; min-height: 1.2em; }
   .compare-hint { text-align:center; font-size:0.75rem; color: var(--muted); margin-top: 6px; }
@@ -212,8 +230,8 @@
 <body>
 
 <header>
-  <h1>Sony A7IV · 50mm Film Look</h1>
-  <p>Upload a photo, get it back graded in a warm, filmic 50mm style.</p>
+  <h1>Sony A7IV · 50mm Photo Filters</h1>
+  <p>Upload a photo, apply a warm filmic grade or a clean punchy street/Zeiss look.</p>
 </header>
 
 <div class="layout">
@@ -247,41 +265,79 @@
   </div>
 
   <div class="panel">
-    <h2>Look</h2>
-    <div class="presets">
-      <button data-preset="a74">A7IV 50mm</button>
-      <button data-preset="subtle">Subtle</button>
-      <button data-preset="punchy">Punchy</button>
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tabFilm" data-mode="film">Film · A7IV 50mm</button>
+      <button class="mode-tab" id="tabStreet" data-mode="street">Street · Zeiss 50mm</button>
     </div>
 
-    <h2>Adjust</h2>
-    <div class="control">
-      <label>Warmth <span class="val" id="val-warmth">40</span></label>
-      <input type="range" id="warmth" min="0" max="100" value="40">
+    <div class="mode-panel active" id="filmPanel">
+      <h2>Look</h2>
+      <div class="presets">
+        <button data-mode="film" data-preset="a74">A7IV 50mm</button>
+        <button data-mode="film" data-preset="subtle">Subtle</button>
+        <button data-mode="film" data-preset="punchy">Punchy</button>
+      </div>
+
+      <h2>Adjust</h2>
+      <div class="control">
+        <label>Warmth <span class="val" id="val-warmth">40</span></label>
+        <input type="range" id="warmth" min="0" max="100" value="40">
+      </div>
+      <div class="control">
+        <label>Contrast <span class="val" id="val-contrast">16</span></label>
+        <input type="range" id="contrast" min="0" max="100" value="16">
+      </div>
+      <div class="control">
+        <label>Faded blacks <span class="val" id="val-fade">16</span></label>
+        <input type="range" id="fade" min="0" max="100" value="16">
+      </div>
+      <div class="control">
+        <label>Saturation <span class="val" id="val-saturation">-16</span></label>
+        <input type="range" id="saturation" min="-50" max="50" value="-16">
+      </div>
+      <div class="control">
+        <label>Glow / haze <span class="val" id="val-glow">30</span></label>
+        <input type="range" id="glow" min="0" max="100" value="30">
+      </div>
+      <div class="control">
+        <label>Vignette <span class="val" id="val-vignette">26</span></label>
+        <input type="range" id="vignette" min="0" max="100" value="26">
+      </div>
+      <div class="control">
+        <label>Grain <span class="val" id="val-grain">18</span></label>
+        <input type="range" id="grain" min="0" max="100" value="18">
+      </div>
     </div>
-    <div class="control">
-      <label>Contrast <span class="val" id="val-contrast">16</span></label>
-      <input type="range" id="contrast" min="0" max="100" value="16">
-    </div>
-    <div class="control">
-      <label>Faded blacks <span class="val" id="val-fade">16</span></label>
-      <input type="range" id="fade" min="0" max="100" value="16">
-    </div>
-    <div class="control">
-      <label>Saturation <span class="val" id="val-saturation">-16</span></label>
-      <input type="range" id="saturation" min="-50" max="50" value="-16">
-    </div>
-    <div class="control">
-      <label>Glow / haze <span class="val" id="val-glow">30</span></label>
-      <input type="range" id="glow" min="0" max="100" value="30">
-    </div>
-    <div class="control">
-      <label>Vignette <span class="val" id="val-vignette">26</span></label>
-      <input type="range" id="vignette" min="0" max="100" value="26">
-    </div>
-    <div class="control">
-      <label>Grain <span class="val" id="val-grain">18</span></label>
-      <input type="range" id="grain" min="0" max="100" value="18">
+
+    <div class="mode-panel" id="streetPanel">
+      <h2>Look</h2>
+      <div class="presets">
+        <button data-mode="street" data-preset="street">Street Clean</button>
+        <button data-mode="street" data-preset="hardSun">Hard Sun</button>
+        <button data-mode="street" data-preset="overcast">Overcast</button>
+      </div>
+
+      <h2>Adjust</h2>
+      <div class="control">
+        <label>Contrast <span class="val" id="val-s_contrast">34</span></label>
+        <input type="range" id="s_contrast" min="0" max="100" value="34">
+      </div>
+      <div class="control">
+        <label>Clarity <span class="val" id="val-s_clarity">38</span></label>
+        <input type="range" id="s_clarity" min="0" max="100" value="38">
+      </div>
+      <div class="control">
+        <label>Saturation <span class="val" id="val-s_saturation">10</span></label>
+        <input type="range" id="s_saturation" min="-50" max="50" value="10">
+      </div>
+      <div class="control">
+        <label>Shadow depth <span class="val" id="val-s_shadows">26</span></label>
+        <input type="range" id="s_shadows" min="0" max="100" value="26">
+      </div>
+      <div class="control">
+        <label>Vignette <span class="val" id="val-s_vignette">12</span></label>
+        <input type="range" id="s_vignette" min="0" max="100" value="12">
+      </div>
     </div>
   </div>
 </div>
@@ -303,22 +359,31 @@
   const btnDownload = document.getElementById('btnDownload');
   const btnReset = document.getElementById('btnReset');
 
-  const sliderIds = ['warmth', 'contrast', 'fade', 'saturation', 'glow', 'vignette', 'grain'];
+  const filmSliderIds = ['warmth', 'contrast', 'fade', 'saturation', 'glow', 'vignette', 'grain'];
+  const streetSliderIds = ['s_contrast', 's_clarity', 's_saturation', 's_shadows', 's_vignette'];
+  const allSliderIds = filmSliderIds.concat(streetSliderIds);
   const sliders = {};
-  sliderIds.forEach(id => sliders[id] = document.getElementById(id));
+  allSliderIds.forEach(id => sliders[id] = document.getElementById(id));
 
-  const presets = {
+  const filmPresets = {
     a74:     { warmth: 40, contrast: 16, fade: 16, saturation: -16, glow: 30, vignette: 26, grain: 18 },
     subtle:  { warmth: 22, contrast: 10, fade: 10, saturation: -8,  glow: 16, vignette: 14, grain: 8 },
     punchy:  { warmth: 55, contrast: 26, fade: 10, saturation: -4,  glow: 42, vignette: 36, grain: 22 }
   };
 
+  const streetPresets = {
+    street:   { s_contrast: 34, s_clarity: 38, s_saturation: 10, s_shadows: 26, s_vignette: 12 },
+    hardSun:  { s_contrast: 46, s_clarity: 45, s_saturation: 14, s_shadows: 42, s_vignette: 18 },
+    overcast: { s_contrast: 26, s_clarity: 30, s_saturation: 2,  s_shadows: 22, s_vignette: 10 }
+  };
+
+  let currentMode = 'film'; // 'film' | 'street'
   let originalImageData = null; // pristine pixels at working resolution
   let width = 0, height = 0;
   let showingOriginal = false;
 
   function updateLabels() {
-    sliderIds.forEach(id => {
+    allSliderIds.forEach(id => {
       document.getElementById('val-' + id).textContent = sliders[id].value;
     });
   }
@@ -432,17 +497,112 @@
     ctx.restore();
   }
 
+  // Street · Zeiss 50mm — true-to-life color, punchy contrast, deep-but-real shadows,
+  // high micro-contrast ("clarity"), clean rendering (no grain/glow/warm cast).
+  function applyStreetFilter(params) {
+    if (!originalImageData) return;
+    const src = originalImageData.data;
+    const out = ctx.createImageData(width, height);
+    const d = out.data;
+
+    const contrastLUT = buildContrastLUT(params.s_contrast);
+    const shadowAmt = params.s_shadows / 100;
+    const satAdj = params.s_saturation / 100;
+    const vignetteAmt = params.s_vignette / 100;
+
+    const cx = width / 2, cy = height / 2;
+    const maxDist = Math.sqrt(cx * cx + cy * cy);
+
+    let idx = 0;
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        let r = src[idx], g = src[idx + 1], b = src[idx + 2];
+
+        // 1. deepen shadows (crush toward black, midtones/highlights untouched)
+        if (shadowAmt > 0) {
+          r -= shadowAmt * Math.max(0, 128 - r) / 128 * 46;
+          g -= shadowAmt * Math.max(0, 128 - g) / 128 * 46;
+          b -= shadowAmt * Math.max(0, 128 - b) / 128 * 46;
+        }
+
+        // 2. punchy contrast curve
+        r = contrastLUT[clamp255(r) | 0];
+        g = contrastLUT[clamp255(g) | 0];
+        b = contrastLUT[clamp255(b) | 0];
+
+        // 3. natural saturation/vibrance (no color cast)
+        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+        r = lum + (r - lum) * (1 + satAdj);
+        g = lum + (g - lum) * (1 + satAdj);
+        b = lum + (b - lum) * (1 + satAdj);
+
+        // 4. subtle vignette
+        const dx = (x - cx) / maxDist;
+        const dy = (y - cy) / maxDist;
+        const dist = Math.sqrt(dx * dx + dy * dy) * 1.42;
+        let t = (dist - 0.35) / (1.1 - 0.35);
+        t = t < 0 ? 0 : (t > 1 ? 1 : t);
+        const smooth = t * t * (3 - 2 * t);
+        const vf = 1 - vignetteAmt * smooth * 0.45;
+        r *= vf; g *= vf; b *= vf;
+
+        d[idx] = clamp255(r);
+        d[idx + 1] = clamp255(g);
+        d[idx + 2] = clamp255(b);
+        d[idx + 3] = src[idx + 3];
+        idx += 4;
+      }
+    }
+
+    ctx.putImageData(out, 0, 0);
+
+    if (params.s_clarity > 0) {
+      applyClarity(params.s_clarity / 100 * 1.1);
+    }
+  }
+
+  function applyClarity(amt) {
+    // Mid-frequency local-contrast boost (unsharp mask at a large radius):
+    // blur a copy, then push each pixel away from its blurred neighborhood average.
+    const bw = Math.max(1, Math.round(width / 6));
+    const bh = Math.max(1, Math.round(height / 6));
+    const small = document.createElement('canvas');
+    small.width = bw;
+    small.height = bh;
+    small.getContext('2d').drawImage(canvas, 0, 0, bw, bh);
+
+    const big = document.createElement('canvas');
+    big.width = width;
+    big.height = height;
+    const bctx = big.getContext('2d');
+    bctx.imageSmoothingEnabled = true;
+    bctx.drawImage(small, 0, 0, width, height);
+    const blurred = bctx.getImageData(0, 0, width, height).data;
+
+    const current = ctx.getImageData(0, 0, width, height);
+    const cd = current.data;
+    for (let i = 0; i < cd.length; i += 4) {
+      cd[i] = clamp255(cd[i] + amt * (cd[i] - blurred[i]));
+      cd[i + 1] = clamp255(cd[i + 1] + amt * (cd[i + 1] - blurred[i + 1]));
+      cd[i + 2] = clamp255(cd[i + 2] + amt * (cd[i + 2] - blurred[i + 2]));
+    }
+    ctx.putImageData(current, 0, 0);
+  }
+
   function currentParams() {
+    const ids = currentMode === 'film' ? filmSliderIds : streetSliderIds;
     const p = {};
-    sliderIds.forEach(id => p[id] = Number(sliders[id].value));
+    ids.forEach(id => p[id] = Number(sliders[id].value));
     return p;
   }
 
   function render() {
     if (showingOriginal) {
       ctx.putImageData(originalImageData, 0, 0);
-    } else {
+    } else if (currentMode === 'film') {
       applyFilter(currentParams());
+    } else {
+      applyStreetFilter(currentParams());
     }
   }
 
@@ -503,7 +663,7 @@
   });
 
   // Sliders
-  sliderIds.forEach(id => {
+  allSliderIds.forEach(id => {
     sliders[id].addEventListener('input', () => {
       updateLabels();
       showingOriginal = false;
@@ -520,20 +680,41 @@
   btnToggle.addEventListener('touchend', showFiltered);
 
   // Reset
-  btnReset.addEventListener('click', () => applyPreset('a74'));
+  btnReset.addEventListener('click', () => {
+    applyPreset(currentMode, currentMode === 'film' ? 'a74' : 'street');
+  });
 
   // Presets
-  function applyPreset(name) {
+  function applyPreset(mode, name) {
+    const presets = mode === 'film' ? filmPresets : streetPresets;
     const p = presets[name];
     if (!p) return;
-    sliderIds.forEach(id => sliders[id].value = p[id]);
+    Object.keys(p).forEach(id => sliders[id].value = p[id]);
     updateLabels();
     showingOriginal = false;
     render();
   }
   document.querySelectorAll('.presets button').forEach(b => {
-    b.addEventListener('click', () => applyPreset(b.dataset.preset));
+    b.addEventListener('click', () => applyPreset(b.dataset.mode, b.dataset.preset));
   });
+
+  // Mode tabs
+  const tabFilm = document.getElementById('tabFilm');
+  const tabStreet = document.getElementById('tabStreet');
+  const filmPanel = document.getElementById('filmPanel');
+  const streetPanel = document.getElementById('streetPanel');
+
+  function setMode(mode) {
+    currentMode = mode;
+    tabFilm.classList.toggle('active', mode === 'film');
+    tabStreet.classList.toggle('active', mode === 'street');
+    filmPanel.classList.toggle('active', mode === 'film');
+    streetPanel.classList.toggle('active', mode === 'street');
+    showingOriginal = false;
+    render();
+  }
+  tabFilm.addEventListener('click', () => setMode('film'));
+  tabStreet.addEventListener('click', () => setMode('street'));
 
   // Download — shown in a modal with a real, directly-clickable save link plus a
   // press-and-hold/right-click fallback, since sandboxed viewers (e.g. Artifacts)
@@ -550,6 +731,7 @@
     const dataUrl = canvas.toDataURL('image/jpeg', 0.93);
     modalImg.src = dataUrl;
     modalSaveLink.href = dataUrl;
+    modalSaveLink.download = currentMode === 'film' ? 'a7iv-50mm-filtered.jpg' : 'a7iv-zeiss-street-filtered.jpg';
     downloadModal.classList.add('open');
   });
 
